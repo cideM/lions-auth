@@ -105,19 +105,7 @@ const verify = (req, res) => {
 server.post('/api/session', session);
 server.post('/api/verify', verify);
 
-if (process.env.NODE_ENV === 'development') {
-  const httpsOptions = {
-    key: fs.readFileSync('./certs/localhost-key.pem'),
-    cert: fs.readFileSync('./certs/localhost.pem'),
-  };
-
-  https.createServer(httpsOptions, server).listen(port, (err) => {
-    if (err) throw err;
-    logger.log('info', `> Ready on https://localhost:${port}`);
-  });
-} else {
-  createServer(server).listen(port, (err) => {
-    if (err) throw err;
-    logger.log('info', `> Ready on http://localhost:${port}`);
-  });
-}
+server.listen(port, (err) => {
+  if (err) throw err;
+  logger.log('info', `> Ready on http://localhost:${port}`);
+});
