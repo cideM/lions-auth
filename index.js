@@ -1,6 +1,7 @@
 const winston = require('winston');
 const cookieParser = require('cookie-parser');
 const firebaseAdmin = require('firebase-admin');
+const cors = require('cors');
 const express = require('express');
 const bodyParser = require('body-parser');
 const expressWinston = require('express-winston');
@@ -9,6 +10,8 @@ const serviceAccount = require('./firebase-admin.json');
 const port = process.env.PORT || 3001;
 
 const server = express();
+
+server.use(cors());
 
 server.use(
   expressWinston.logger({
