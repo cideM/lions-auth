@@ -1,4 +1,3 @@
-const csrf = require('csurf');
 const winston = require('winston');
 const cookieParser = require('cookie-parser');
 const https = require('https');
@@ -33,8 +32,6 @@ server.use(
 
 server.use(cookieParser());
 server.use(bodyParser.json());
-
-const csrfProtection = csrf({ cookie: true });
 
 const { format } = winston;
 
@@ -105,13 +102,8 @@ const verify = (req, res) => {
     });
 };
 
-server.get('*', csrfProtection, (req, res, next) => {
-  res.cookie('XSRF-TOKEN', req.csrfToken());
-  next();
-});
-
-server.post('/api/session', csrfProtection, session);
-server.post('/api/verify', csrfProtection, verify);
+server.post('/api/session', session);
+server.post('/api/verify', verify);
 
 if (process.env.NODE_ENV === 'development') {
   const httpsOptions = {
