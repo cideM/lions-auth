@@ -6,7 +6,7 @@ const bodyParser = require('body-parser');
 const expressWinston = require('express-winston');
 const serviceAccount = require('./firebase-admin.json');
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 
 const server = express();
 
