@@ -5,9 +5,12 @@ services:
     build: .
     environment:
       - NODE_ENV
+      - PORT=3000
+    ports:
+      - 3000:3000
     networks:
-      - droplet1_app_network
+      - lions_network
 
 networks:
-  droplet1_app_network:
+  lions_network:
     external: true
