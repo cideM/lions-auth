@@ -1,14 +1,16 @@
-const winston = require('winston');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const express = require('express');
 const bodyParser = require('body-parser');
-const expressWinston = require('express-winston');
 const firebaseAdmin = require('firebase-admin');
+
 const NotAuthorizedError = require('./errors/NotAuthorizedError');
 const serviceAccount = require('../firebase-admin.json');
 const verify = require('./routes/verify');
 const session = require('./routes/session');
+const requestLogger = require('./logging/requestLogger');
+const errorLogger = require('./logging/errorLogger');
+const devLogger = require('./logging/devLogger');
 
 const port = process.env.PORT || 3001;
 
@@ -16,55 +18,18 @@ const server = express();
 
 server.use(cors());
 
-const requestLogger = expressWinston.logger({
-  transports: [new winston.transports.Console()],
-  format: winston.format.combine(
-    winston.format.colorize(),
-    winston.format.json(),
-  ),
-  meta: true,
-  msg: 'HTTP {{req.method}} {{req.url}}',
-  expressFormat: true,
-  colorize: false,
-});
+server.use(cookieParser());
 
-const errorLogger = expressWinston.errorLogger({
-  transports: [new winston.transports.Console()],
-  format: winston.format.combine(
-    winston.format.colorize(),
-    winston.format.json(),
-  ),
-});
+server.use(bodyParser.json());
 
 server.use(requestLogger);
 
-server.use(cookieParser());
-server.use(bodyParser.json());
-
-const { format } = winston;
-
-const logger = winston.createLogger({
-  level: 'info',
-  format: format.combine(format.splat(), format.json()),
-});
-
-if (process.env.NODE_ENV === 'development') {
-  logger.add(
-    new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple(),
-      ),
-    }),
-  );
-}
-
 firebaseAdmin.initializeApp({
   credential: firebaseAdmin.credential.cert(serviceAccount),
-  databaseURL: 'https://<DATABASE_NAME>.firebaseio.com',
+  databaseURL: 'https://<DATABASE_NAME>.firebaseio.com'
 });
 
-const mapDomainErrorToHttpResponse = (err) => {
+const mapDomainErrorToHttpResponse = err => {
   if (err instanceof NotAuthorizedError) return 403;
   return 500;
 };
@@ -82,7 +47,7 @@ server.use((err, req, res, next) => {
   res.status(code).send(err.message);
 });
 
-server.listen(port, (err) => {
+server.listen(port, err => {
   if (err) throw err;
-  logger.log('info', `> Ready on http://localhost:${port}`);
+  devLogger.log('info', `> Ready on http://localhost:${port}`);
 });

@@ -1,4 +1,5 @@
 const firebaseAdmin = require('firebase-admin');
+const NotAuthorizedError = require('../errors/NotAuthorizedError');
 
 const verify = (req, res) => {
   const sessionCookie = req.cookies.session;
@@ -10,8 +11,7 @@ const verify = (req, res) => {
       res.json({ success: true });
     })
     .catch(() => {
-      // Session cookie is unavailable or invalid. Force user to login.
-      res.status(401).send('UNAUTHORIZED REQUEST!');
+      throw new NotAuthorizedError('Could not verify token');
     });
 };
 
