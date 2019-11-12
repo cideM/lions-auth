@@ -2,6 +2,9 @@
   "env": {
     "node": true
   },
-  "extends": "airbnb-base",
-  "plugins": ["promise"]
+  "extends": ["airbnb-base", "prettier"],
+  "plugins": ["promise", "prettier"],
+  "rules": {
+    "prettier/prettier": "error"
+  }
 }
