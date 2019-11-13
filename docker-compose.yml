@@ -1,7 +1,7 @@
-version: "3"
+version: '3'
 
 services:
-  lions-auth:
+  lions_auth:
     build: .
     environment:
       - NODE_ENV

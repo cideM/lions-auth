@@ -1,22 +1,21 @@
 const cookieParser = require('cookie-parser');
-const cors = require('cors');
+// const csrf = require('csurf');
 const express = require('express');
 const bodyParser = require('body-parser');
 const firebaseAdmin = require('firebase-admin');
 
 const NotAuthorizedError = require('./errors/NotAuthorizedError');
 const serviceAccount = require('../firebase-admin.json');
-const verify = require('./routes/verify');
-const session = require('./routes/session');
 const requestLogger = require('./logging/requestLogger');
 const errorLogger = require('./logging/errorLogger');
 const devLogger = require('./logging/devLogger');
 
+const auth = require('./components/auth');
+// const verifyCookieMiddleware = require('./components/auth/verifyCookieMiddleware');
+
 const port = process.env.PORT || 3001;
 
 const server = express();
-
-server.use(cors());
 
 server.use(cookieParser());
 
@@ -30,13 +29,15 @@ firebaseAdmin.initializeApp({
 });
 
 const mapDomainErrorToHttpResponse = err => {
+  // csrf error https://github.com/expressjs/csurf#custom-error-handling
+  if (err.code === 'EBADCSRFTOKEN') return 403;
   if (err instanceof NotAuthorizedError) return 403;
   return 500;
 };
 
-server.post('/api/session', session);
+server.use(auth);
 
-server.post('/api/verify', verify);
+// server.use(verifyCookieMiddleware);
 
 server.use(errorLogger);
 

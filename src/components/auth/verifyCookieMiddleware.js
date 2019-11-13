@@ -1,7 +1,7 @@
 const firebaseAdmin = require('firebase-admin');
-const NotAuthorizedError = require('../errors/NotAuthorizedError');
+const NotAuthorizedError = require('../../errors/NotAuthorizedError');
 
-const verify = (req, res) => {
+const verifyCookieMiddleware = (req, res, next) => {
   const sessionCookie = req.cookies.session;
 
   firebaseAdmin
@@ -11,8 +11,9 @@ const verify = (req, res) => {
       res.json({ success: true });
     })
     .catch(() => {
-      throw new NotAuthorizedError('Could not verify token');
+      const err = new NotAuthorizedError('Could not verify token');
+      next(err);
     });
 };
 
-module.exports = verify;
+module.exports = verifyCookieMiddleware;

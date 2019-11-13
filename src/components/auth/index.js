@@ -1,7 +1,13 @@
 const firebaseAdmin = require('firebase-admin');
-const NotAuthorizedError = require('../errors/NotAuthorizedError');
+const express = require('express');
+const csrf = require('csurf');
+const NotAuthorizedError = require('../../errors/NotAuthorizedError');
 
-const session = (req, res, next) => {
+const router = express.Router();
+
+router.use(csrf({ cookie: true, ignoreMethods: ['POST'] }));
+
+router.post('/session_cookie', (req, res, next) => {
   // https://firebase.google.com/docs/auth/admin/manage-cookies
   // Get the ID token passed and the CSRF token.
   const idToken = req.body.idToken.toString();
@@ -16,18 +22,18 @@ const session = (req, res, next) => {
   firebaseAdmin
     .auth()
     .createSessionCookie(idToken, { expiresIn })
-    .then((sessionCookie) => {
+    .then(sessionCookie => {
       // Set cookie policy for session cookie.
       const options = { maxAge: expiresIn, httpOnly: true, secure: true };
       res.cookie('session', sessionCookie, options);
       res.end(JSON.stringify({ status: 'success' }));
     })
-    .catch((error) => {
+    .catch(error => {
       const err = new NotAuthorizedError(
-        `Could not authorize claims based on token: ${error.message}`,
+        `Could not authorize claims based on token: ${error.message}`
       );
       next(err);
     });
-};
+});
 
-module.exports = session;
+module.exports = router;
